@@ -131,17 +131,20 @@ void MC_Game::Update(GSIO *gsio)
     bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
     if (dead)
     {
-        for (MC_Enemy* en : enemies) delete en;
-        enemies.clear();
-        for (MC_Trooper* t : troopers) delete t;
-        troopers.clear();
-        dead = false;
-        MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
-        bs->Load(gsio, this);
-        troopers.push_back(bs);
-        MC_Enemy* en = new MC_Enemy();
-        en->Load(gsio, this);
-        enemies.push_back(en);
+        if (enter)
+        {
+            dead = false;
+            for (MC_Enemy* en : enemies) delete en;
+            enemies.clear();
+            for (MC_Trooper* t : troopers) delete t;
+            troopers.clear();
+            MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
+            bs->Load(gsio, this);
+            troopers.push_back(bs);
+            MC_Enemy* en = new MC_Enemy();
+            en->Load(gsio, this);
+            enemies.push_back(en);
+        }
         return;
     }
     timeSinceWave += gsio->window.i_deltaTime;
@@ -176,6 +179,8 @@ void MC_Game::Update(GSIO *gsio)
         right = true;
     else if (glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_RELEASE)
         right = false;
+
+    if (selectedTroopIndex > -1 && troopers.size() == 0) selectedTroopIndex = -1;
     if (selectedTroopIndex >= 0)
     {
         if (glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -295,6 +300,11 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
         die = true;
         //player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &deathClip);
         //player.Play();
+    }
+
+    if (xposition < -4.0f)
+    {
+        game->dead = true;
     }
 }
 

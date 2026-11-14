@@ -283,5 +283,5 @@ void main()
     vec4 fogColor = vec4(1.0)*t;
     pn *= depth.x;
     color = mix(texture(image, TexCoords), vec4(0,1.0,0.0,1.0), 0.02);
-    color = mix(color, fogColor, 0.1*pn);
+    color = mix(color, fogColor, min(0.1*pn, 0.3));
 }
