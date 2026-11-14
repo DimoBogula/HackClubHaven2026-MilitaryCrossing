@@ -9,6 +9,18 @@ class MC_RenderedText;
 class GSIO;
 class MC_Game;
 
+class MC_Enemy
+{
+    public:
+    MC_EasyRender* mesh;
+    float position;
+    float xposition;
+    float health = 0.0f;
+
+    void Load(GSIO* gsio, MC_Game* game);
+    void Update(GSIO* gsio, MC_Game* game);
+};
+
 class MC_Trooper
 {
     public:
@@ -54,6 +66,7 @@ class MC_Game
 
     uint64_t money = 0;
     std::vector<MC_Trooper*> troopers;
+    std::vector<MC_Enemy*> enemies;
 
     void Init(GSIO* gsio);
 

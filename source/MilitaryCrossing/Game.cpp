@@ -29,9 +29,13 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 
 void MC_Game::Init(GSIO *gsio)
 {
+    srand(time(NULL));
     MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
     bs->Load(gsio, this);
     troopers.push_back(bs);
+    MC_Enemy* en = new MC_Enemy();
+    en->Load(gsio, this);
+    enemies.push_back(en);
 }
 
 void MC_Game::Update(GSIO *gsio)
@@ -65,4 +69,31 @@ void MC_Game::Update(GSIO *gsio)
     {
         t->Update(gsio, this);
     }
+
+    for (MC_Enemy* t : enemies)
+    {
+        t->Update(gsio, this);
+    }
+}
+
+void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
+{
+    mesh = new MC_EasyRender();
+    mesh->Load(gsio, "EnemySh", "Enemy");
+    xposition = (float)rand() / (float)RAND_MAX;
+    float range = 8.0f;
+    xposition *= range;
+    xposition -= range/2.0f;
+
+    position = 18.0f;
+
+    mesh->model->transform.position.x = xposition;
+    mesh->model->transform.position.z = position;
+}
+
+void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
+{
+    position -= gsio->window.i_deltaTime*30.0f;
+    mesh->model->transform.position.x = xposition;
+    mesh->model->transform.position.z = position;
 }

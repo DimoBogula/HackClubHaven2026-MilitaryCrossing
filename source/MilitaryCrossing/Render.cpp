@@ -91,6 +91,11 @@ void MC_Renderer::Update(GSIO *gsio)
         i++;
     }
 
+    for (MC_Enemy* troop : gsio->state->game.enemies)
+    {
+        troop->mesh->Render(playerView, gsio, renderContext);
+    }
+
     uiView->Clear();
 
     GSIO_renderContext uirenderContext;
