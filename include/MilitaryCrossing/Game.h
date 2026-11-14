@@ -42,6 +42,9 @@ class MC_Trooper
     GSIO_audioClip clip;
     GSIO_audioPlayer player;
 
+    void TextInit(GSIO* gsio);
+    void TextUpdate(GSIO* gsio);
+
     virtual void Load(GSIO* gsio, MC_Game* game) {}
     virtual void Update(GSIO* gsio, MC_Game* game) {}
 };

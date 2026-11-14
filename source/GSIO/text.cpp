@@ -81,13 +81,18 @@ void GSIO_text::Render(GSIO *gsio, GSIO_textfont *tf, GSIO_material *material, G
     glUseProgram(material->shaderID);
     material->SetUniforms();
     material->BindTextures(1);
+    GSIO_transform rotModel;
+    rotModel.rotation = transform->rotation;
+    rotModel.size = glm::vec3(1.0f);
+    rotModel.position = transform->position;
     glUniformMatrix4fv(glGetUniformLocation(material->shaderID, "projection"), 1, GL_FALSE, glm::value_ptr(rc.projection));
     glUniformMatrix4fv(glGetUniformLocation(material->shaderID, "view"), 1, GL_FALSE, glm::value_ptr(rc.view));
+    glUniformMatrix4fv(glGetUniformLocation(material->shaderID, "model"), 1, GL_FALSE, glm::value_ptr(rotModel.Matrix()));
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
     std::string::const_iterator c;
-    glm::vec3 position = transform->position;
+    glm::vec3 position = glm::vec3(0.0f);
     for (c = text.begin(); c != text.end(); c++) 
     {
         GSIO_textfontcharacter ch = tf->d_characters[*c];

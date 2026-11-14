@@ -20,12 +20,15 @@ void MC_BarricadeSoldier::Load(GSIO *gsio, MC_Game *game)
     meshes.push_back(soldier);
     meshes.push_back(barricade);
 
+    TextInit(gsio);
+
     SetPos();
 }
 
 void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 {
     SetPos();
+    TextUpdate(gsio);
 }
 
 void MC_Game::Init(GSIO *gsio)
@@ -134,4 +137,19 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
     position -= gsio->window.i_deltaTime*0.2f;
     mesh->model->transform.position.x = xposition;
     mesh->model->transform.position.z = position;
+}
+
+void MC_Trooper::TextInit(GSIO *gsio)
+{
+    stats = new MC_RenderedText();
+    stats->Init(&gsio->engine_font, gsio);
+    stats->text = "Test stat";
+    stats->transform.rotation = glm::vec3(0.0f,0.0f,82.0f);
+    stats->transform.position.y = gsio->window.w_height*0.2f;
+    stats->transform.size = glm::vec3(0.3f);
+}
+
+void MC_Trooper::TextUpdate(GSIO *gsio)
+{
+    stats->transform.position.x = (sin(gsio->state->time)*(gsio->window.w_width/2))+(gsio->window.w_width/2);
 }

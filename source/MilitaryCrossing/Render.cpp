@@ -107,6 +107,12 @@ void MC_Renderer::Update(GSIO *gsio)
 
     uirenderContext.projection = glm::ortho(0.0f, static_cast<float>(gsio->window.w_width), 0.0f, static_cast<float>(gsio->window.w_height));
     uiView->Bind();
+    i = 0;
+    for (MC_Trooper* troop : gsio->state->game.troopers)
+    {
+        troop->stats->Render(gsio, uirenderContext);
+        i++;
+    }
     moneyText.Render(gsio, uirenderContext);
     waveText.Render(gsio, uirenderContext);
 
