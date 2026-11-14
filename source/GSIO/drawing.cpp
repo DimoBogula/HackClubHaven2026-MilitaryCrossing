@@ -119,6 +119,9 @@ void GSIO_uniform::SetUniform(unsigned int shaderID)
         case GSIO_uniformFormat::Matrix4:
         glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(std::get<glm::mat4>(value)));
         break;
+        case GSIO_uniformFormat::Float:
+        glUniform1f(location, std::get<float>(value));
+        break;
     }
 }
 
@@ -144,6 +147,7 @@ void GSIO_renderer::Render(GSIO *gsio, GSIO_renderContext& rc)
     shaders[0]->use();
     glUniform1i(glGetUniformLocation(shaders[0]->ID, "depth"), 1);
     glUniform1i(glGetUniformLocation(shaders[0]->ID, "image"), 0);
+    glUniform1f(glGetUniformLocation(shaders[0]->ID, "time"), gsio->state->time);
     quad.Render(shaders[0], gsio);
 }
 

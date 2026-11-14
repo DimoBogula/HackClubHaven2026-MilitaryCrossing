@@ -1,3 +1,4 @@
 /.vscode/
 /build-win64/
+/build-linux/
 /out/cache/
