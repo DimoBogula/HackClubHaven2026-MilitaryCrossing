@@ -73,6 +73,9 @@ class MC_BarricadeSoldier : public MC_Trooper
 class MC_Game
 {
     public:
+
+    bool dead = false;
+
     float timeSinceWave = 0.0f;
     uint64_t waveIndex = 1;
 

@@ -92,7 +92,10 @@ void MC_Game::Init(GSIO *gsio)
 
     lvlUp.Load(gsio->assetmanager.GetSoundAsset("lvlUp"));
     lvlUpP.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &lvlUp);
+}
 
+void MC_Game::Update(GSIO *gsio)
+{
     if (enemies.size() > 0)
     {
         gsio->state->soundtrack.ActivateTrack(2);
@@ -125,10 +128,22 @@ void MC_Game::Init(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(5);
     }
-}
-
-void MC_Game::Update(GSIO *gsio)
-{
+    bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
+    if (dead)
+    {
+        for (MC_Enemy* en : enemies) delete en;
+        enemies.clear();
+        for (MC_Trooper* t : troopers) delete t;
+        troopers.clear();
+        dead = false;
+        MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
+        bs->Load(gsio, this);
+        troopers.push_back(bs);
+        MC_Enemy* en = new MC_Enemy();
+        en->Load(gsio, this);
+        enemies.push_back(en);
+        return;
+    }
     timeSinceWave += gsio->window.i_deltaTime;
     if (enemies.size() == 0 && timeSinceWave >= 1.0f)
     {
@@ -142,7 +157,6 @@ void MC_Game::Update(GSIO *gsio)
         }
     }
 
-    bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
     bool del = glfwGetKey(gsio->window.r_window, GLFW_KEY_BACKSPACE) == GLFW_PRESS;
     if (glfwGetKey(gsio->window.r_window, GLFW_KEY_UP) == GLFW_PRESS && troopers.size() > 0)
     {
@@ -190,6 +204,7 @@ void MC_Game::Update(GSIO *gsio)
         {
             money += troopers[selectedTroopIndex]->sellPrice;
             troopers[selectedTroopIndex]->die = true;
+            selectedTroopIndex = -1;
         }
     }
     else

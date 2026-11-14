@@ -63,7 +63,10 @@ void MC_Renderer::Update(GSIO *gsio)
 {
 
     moneyText.text = "Geld: "+std::to_string(gsio->state->game.money);
-    waveText.text = "Wave "+std::to_string(gsio->state->game.waveIndex)+" : "+std::to_string((int)std::floor(gsio->state->game.timeSinceWave));
+    if (gsio->state->game.dead)
+        waveText.text = "Du bist gestorben! Enter um neu zu starten.";
+    else
+        waveText.text = "Wave "+std::to_string(gsio->state->game.waveIndex)+" : "+std::to_string((int)std::floor(gsio->state->game.timeSinceWave));
 
     street->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     GSIO_renderContext renderContext;
