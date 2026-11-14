@@ -280,8 +280,8 @@ void main()
     float t = time*0.2;
     float pn = clamp((cnoise(vec4(t+TexCoords.x,t+TexCoords.y,t,t))+1)/2, 0, 1);
     vec4 depth = 1.9-texture(depth, TexCoords);
-    vec4 fogColor = vec4(clamp(t, 0.0, 1.0));
+    vec4 fogColor = vec4(clamp(t, 0.0, 2.0));
     pn *= depth.x;
     color = mix(texture(image, TexCoords), vec4(0,1.0,0.0,1.0), 0.02);
-    color = mix(color, fogColor, min(0.1*pn, 0.3));
+    color = mix(color, fogColor, min(0.1*pn, 0.9));
 }
