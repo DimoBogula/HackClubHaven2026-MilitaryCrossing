@@ -36,7 +36,9 @@ class MC_Trooper
     float position = 0.0f;
     bool selected = false;
 
-    SIO_audioClip clips[4];
+    bool die = false;
+
+    GSIO_audioClip clips[4];
     GSIO_audioPlayer clipPlayers[4];
     GSIO_audioClip deathClip;
     GSIO_audioPlayer deathPlayer;
@@ -73,6 +75,11 @@ class MC_Game
     public:
     float timeSinceWave = 0.0f;
     uint64_t waveIndex = 1;
+
+    uint64_t permaBonusCount = 0;
+
+    GSIO_audioClip lvlUp;
+    GSIO_audioPlayer lvlUpP;
 
     int selectedTroopIndex = -1;
 

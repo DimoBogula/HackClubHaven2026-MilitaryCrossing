@@ -1,6 +1,6 @@
 #pragma once
 #define GSIO_APPID 480
-#define GSIO_APPNAME "Geese Oil Corp"
+#define GSIO_APPNAME "Military Crossing"
 #define GSIO_Version_String "0.0.1"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

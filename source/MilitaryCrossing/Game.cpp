@@ -45,11 +45,17 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 
     for (MC_Enemy* en : game->enemies)
     {
-        if (en->position-position < 1.0f && timer > 0.4f)
+        if (en->position-position < 0.01f && en->health >= 0.0f)
         {
-            en->health -= 1.0f;
+            game->permaBonusCount++;
+            die = true;
+        }
+        if (en->position-position < 1.0f && timer > 0.4f && en->health >= 0.0f)
+        {
+            en->health -= 1.0f+((level+1)*0.4f);
             if (en->health < 0.0f)
             {
+                game->money += 10*(int)(std::max(en->gene, 1.0f))+(game->permaBonusCount*game->ProgCurve(game->waveIndex));
                 ma_sound_seek_to_pcm_frame(&deathPlayer.sound, 0);
                 deathPlayer.Play();
             }
@@ -62,6 +68,7 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
             timer = 0.0f;
             ma_sound_seek_to_pcm_frame(&player.sound, 0);
             player.Play();
+            break;
         }
     }
 
@@ -82,6 +89,9 @@ void MC_Game::Init(GSIO *gsio)
     MC_Enemy* en = new MC_Enemy();
     en->Load(gsio, this);
     enemies.push_back(en);
+
+    lvlUp.Load(gsio->assetmanager.GetSoundAsset("lvlUp"));
+    lvlUpP.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &lvlUp);
 
     if (enemies.size() > 0)
     {
@@ -131,6 +141,8 @@ void MC_Game::Update(GSIO *gsio)
             enemies.push_back(en);
         }
     }
+
+    bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
     if (glfwGetKey(gsio->window.r_window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         selectedTroopIndex = 0;
@@ -151,10 +163,37 @@ void MC_Game::Update(GSIO *gsio)
         right = false;
     if (selectedTroopIndex >= 0)
     {
+        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        {
+            selectedTroopIndex++;
+        }
+        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        {
+            selectedTroopIndex--;
+        }
+        if (selectedTroopIndex < 0) selectedTroopIndex = 0;
+        if (selectedTroopIndex >= troopers.size()) selectedTroopIndex = troopers.size()-1;
         float dir = 0.0f;
         if (left) dir -= 1.0f;
         if (right) dir += 1.0f;
         troopers[selectedTroopIndex]->position += dir*0.6f*gsio->window.i_deltaTime;
+
+        if (enter && money >= 100)
+        {
+            troopers[selectedTroopIndex]->level++;
+            money -= 100;
+            lvlUpP.Play();
+        }
+    }
+    else
+    {
+        if (enter && money >= 150)
+        {
+            MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
+            bs->Load(gsio, this);
+            troopers.push_back(bs);
+            money -= 150;
+        }
     }
     for (MC_Trooper* t : troopers)
     {
@@ -177,6 +216,18 @@ void MC_Game::Update(GSIO *gsio)
             return false;
         }),
         enemies.end()
+    );
+
+    troopers.erase(
+        std::remove_if(troopers.begin(), troopers.end(), [](const MC_Trooper* obj) {
+            if (obj->die)
+            {
+                delete obj;
+                return true;
+            }
+            return false;
+        }),
+        troopers.end()
     );
 
     if (enemies.size() == 0 && timeSinceWave > 1.0f)
@@ -227,6 +278,7 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
 
 void MC_Trooper::TextSet(GSIO *gsio)
 {
+    sellPrice = timeSinceBuy*std::max(1.0f, gsio->state->game.ProgCurve(gsio->state->game.waveIndex));
     stats->transform.position.x = ((position/2.0f)*(gsio->window.w_width/2))+(gsio->window.w_width/2);
     stats->text = "Level "+std::to_string(level)+" Preis: "+std::to_string(sellPrice);
 }
