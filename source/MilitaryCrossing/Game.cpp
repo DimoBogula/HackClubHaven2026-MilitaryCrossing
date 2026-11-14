@@ -55,7 +55,7 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
             en->health -= 1.0f+((level+1)*0.4f);
             if (en->health < 0.0f)
             {
-                game->money += 10*(int)(std::max(en->gene, 1.0f))+(game->permaBonusCount*game->ProgCurve(game->waveIndex));
+                game->money += 10*(int)(std::max(en->gene, 1.0f))+(game->permaBonusCount*game->ProgCurve(game->waveIndex)*1.7f);
                 ma_sound_seek_to_pcm_frame(&deathPlayer.sound, 0);
                 deathPlayer.Play();
             }
@@ -143,7 +143,8 @@ void MC_Game::Update(GSIO *gsio)
     }
 
     bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
-    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_UP) == GLFW_PRESS)
+    bool del = glfwGetKey(gsio->window.r_window, GLFW_KEY_BACKSPACE) == GLFW_PRESS;
+    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_UP) == GLFW_PRESS && troopers.size() > 0)
     {
         selectedTroopIndex = 0;
     }
@@ -183,6 +184,12 @@ void MC_Game::Update(GSIO *gsio)
             troopers[selectedTroopIndex]->level++;
             money -= 100;
             lvlUpP.Play();
+        }
+
+        if (del)
+        {
+            money += troopers[selectedTroopIndex]->sellPrice;
+            troopers[selectedTroopIndex]->die = true;
         }
     }
     else
@@ -278,7 +285,7 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
 
 void MC_Trooper::TextSet(GSIO *gsio)
 {
-    sellPrice = timeSinceBuy*std::max(1.0f, gsio->state->game.ProgCurve(gsio->state->game.waveIndex));
+    sellPrice = timeSinceBuy*std::max(1.0f, gsio->state->game.ProgCurve(gsio->state->game.waveIndex)*(1+gsio->state->game.permaBonusCount));
     stats->transform.position.x = ((position/2.0f)*(gsio->window.w_width/2))+(gsio->window.w_width/2);
     stats->text = "Level "+std::to_string(level)+" Preis: "+std::to_string(sellPrice);
 }
