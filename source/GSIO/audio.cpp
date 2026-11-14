@@ -1,6 +1,16 @@
 #include <GSIO/audio.h>
 #include <GSIO/sound.h>
 
+void GSIO_audioHost::SetVolume(float v)
+{
+    ma_engine_set_volume(&engine, v);
+}
+
+float GSIO_audioHost::GetVolume()
+{
+    return ma_engine_get_volume(&engine);
+}
+
 GSIO_audioHost::GSIO_audioHost()
 {
     ma_engine_init(NULL, &engine);
@@ -56,6 +66,16 @@ void GSIO_audioPlayer::SetStereo(float v)
 float GSIO_audioPlayer::GetStereo()
 {
     return ma_sound_get_pan(&sound);
+}
+
+void GSIO_audioPlayer::SetLooping(bool v)
+{
+    ma_sound_set_looping(&sound, v);
+}
+
+bool GSIO_audioPlayer::GetLooping()
+{
+    return false;
 }
 
 GSIO_audioPlayer::~GSIO_audioPlayer()

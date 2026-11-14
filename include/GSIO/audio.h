@@ -9,6 +9,9 @@ class GSIO_audioHost
     public:
     ma_engine engine;
 
+    void SetVolume(float v);
+    float GetVolume();
+
     GSIO_audioHost();
     ~GSIO_audioHost();
 };
@@ -41,6 +44,8 @@ class GSIO_audioPlayer
     float GetPitch();
     void SetStereo(float v);
     float GetStereo();
+    void SetLooping(bool v);
+    bool GetLooping();
 
     ~GSIO_audioPlayer();
 };
