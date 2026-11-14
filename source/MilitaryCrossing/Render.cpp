@@ -17,6 +17,13 @@ void MC_Renderer::Load(GSIO *gsio)
     playerView->clearColor = {0.0f,0.0f,0.0f,1.0f};
     playerView->Init(gsio);
 
+    uiView = new GSIO_capturer();
+    uiRenderer = new GSIO_renderer();
+    uiRenderer->shaders.push_back(gsio->assetmanager.GetShaderAsset("uiscreenRender"));
+    uiRenderer->Init(gsio);
+    uiView->clearColor = {0.0f,0.0f,0.0f,1.0f};
+    uiView->Init(gsio);
+
     streetMaterial.shaderID = gsio->assetmanager.GetShaderAsset("StreetShader")->ID;
     streetMaterial.SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
 
@@ -26,9 +33,25 @@ void MC_Renderer::Load(GSIO *gsio)
     street->mesh.indices = streetMesh->indices;
     street->mesh.GenerateMesh();
     street->transform.position = glm::vec3(0.0f,0.0f,0.0f);
-    street->transform.size = glm::vec3(0.5f,0.3f,0.8f);
+    street->transform.size = glm::vec3(0.4);
     street->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     street->materials.push_back(streetMaterial);
+
+    streetgrassMaterial.shaderID = gsio->assetmanager.GetShaderAsset("StreetGrassShader")->ID;
+    streetgrassMaterial.SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
+
+    streetgrass = new GSIO_artist();
+    GSIO_meshasset* streetgrassMesh = gsio->assetmanager.GetMeshAsset("StreetGrass");
+    streetgrass->mesh.vertices = streetgrassMesh->vertices;
+    streetgrass->mesh.indices = streetgrassMesh->indices;
+    streetgrass->mesh.GenerateMesh();
+    streetgrass->transform.position = glm::vec3(0.0f,0.0f,0.0f);
+    streetgrass->transform.size = glm::vec3(0.4);
+    streetgrass->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
+    streetgrass->materials.push_back(streetgrassMaterial);
+
+    moneyText.Init(&gsio->engine_font, gsio);
+    moneyText.text = "Geld: 0";
 }
 
 void MC_Renderer::Update(GSIO *gsio)
@@ -46,8 +69,58 @@ void MC_Renderer::Update(GSIO *gsio)
     renderContext.depthTexture = &playerView->depthTexture;
     renderContext.captureTexture = &playerView->texture;
     street->materials[0].SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
+    streetgrass->materials[0].SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
 
     playerView->RenderArtist(renderContext, street);
+    playerView->RenderArtist(renderContext, streetgrass);
+
+    uiView->Clear();
+
+    GSIO_renderContext uirenderContext;
+    uirenderContext.depthTexture = &uiView->depthTexture;
+    uirenderContext.captureTexture = &uiView->texture;
+
+    uirenderContext.projection = glm::ortho(0.0f, static_cast<float>(gsio->window.w_width), 0.0f, static_cast<float>(gsio->window.w_height));
+    uiView->Bind();
+    moneyText.Render(gsio, uirenderContext);
 
     playerRenderer->Render(gsio, renderContext);
+    uiRenderer->Render(gsio, uirenderContext);
+}
+
+void MC_RenderedText::Init(GSIO_textfont *texf, GSIO* gsio)
+{
+    tf = texf;
+    textobj = GSIO_text(true);
+    textobj.visible = true;
+    mat = &gsio->engine_font_material;
+    transform.size = glm::vec3(1.0f);
+}
+
+void MC_RenderedText::Render(GSIO *gsio, GSIO_renderContext &rc)
+{
+    textobj.text = text;
+    textobj.Render(gsio, tf, mat, &transform, rc);
+}
+
+void MC_EasyRender::Load(GSIO *gsio, std::string matShader, std::string meshName)
+{
+    material.shaderID = gsio->assetmanager.GetShaderAsset(matShader)->ID;
+    material.SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
+
+    model = new GSIO_artist();
+    GSIO_meshasset* streetgrassMesh = gsio->assetmanager.GetMeshAsset(meshName);
+    model->mesh.vertices = streetgrassMesh->vertices;
+    model->mesh.indices = streetgrassMesh->indices;
+    model->mesh.GenerateMesh();
+    model->transform.position = glm::vec3(0.0f,0.0f,0.0f);
+    model->transform.size = glm::vec3(0.4);
+    model->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
+    model->materials.push_back(material);
+}
+
+void MC_EasyRender::Render(GSIO_capturer *view, GSIO* gsio, GSIO_renderContext &rc)
+{
+    model->materials[0].SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
+    view->RenderArtist(rc, model);
 }

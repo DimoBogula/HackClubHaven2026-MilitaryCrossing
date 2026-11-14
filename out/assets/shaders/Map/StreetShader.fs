@@ -29,7 +29,8 @@ void main()
     float isLine = singleDottedLine(vec2(UV.y,UV.x), 0.5, 0.02, 0.03, 0.03);
 
     float noise = squareNoise(UV, 100.0);
-    vec4 baseColor = vec4(0.2, 0.2, 0.23, 0.5) * noise;
+    vec4 baseColor = vec4(0.2, 0.2, 0.23, 1.0) * noise;
+    baseColor *= 0.5;
 
     if (isLine == 1.0)
     {

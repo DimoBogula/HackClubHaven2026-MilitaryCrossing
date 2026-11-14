@@ -133,7 +133,7 @@ void GSIO_renderer::Render(GSIO *gsio, GSIO_renderContext& rc)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, gsio->window.w_width, gsio->window.w_height);
     quad.size = glm::vec2(gsio->window.w_width, gsio->window.w_height);
     quad.position = glm::vec2(0.0f);
