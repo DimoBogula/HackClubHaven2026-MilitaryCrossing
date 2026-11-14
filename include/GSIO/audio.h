@@ -1,3 +1,4 @@
+#pragma once
 #include <miniaudio.h>
 #include <cstdint>
 #include <GL/glm/vec3.hpp>

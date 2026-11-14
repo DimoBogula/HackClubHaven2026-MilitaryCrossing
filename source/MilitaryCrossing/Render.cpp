@@ -1,4 +1,5 @@
 #include <MilitaryCrossing/Render.h>
+#include <MilitaryCrossing/Game.h>
 #include <GSIO/drawing.h>
 #include <GSIO/shader.h>
 #include <GSIO/texture.h>
@@ -54,11 +55,13 @@ void MC_Renderer::Load(GSIO *gsio)
     test.Load(gsio, "SoldierSh", "BarricadeSoldier", "SoldierTex");
 
     moneyText.Init(&gsio->engine_font, gsio);
-    moneyText.text = "Geld: 0";
 }
 
 void MC_Renderer::Update(GSIO *gsio)
 {
+
+    moneyText.text = "Geld: "+std::to_string(gsio->state->game.money);
+
     street->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     GSIO_renderContext renderContext;
     glm::vec3 cameraPos = glm::vec3(0.0f, 5.0f, 0.0f);
@@ -76,14 +79,16 @@ void MC_Renderer::Update(GSIO *gsio)
 
     playerView->RenderArtist(renderContext, street);
     playerView->RenderArtist(renderContext, streetgrass);
-    
+
+    int i = 0;  
     for (MC_Trooper* troop : gsio->state->game.troopers)
     {
         for (MC_EasyRender* render : troop->meshes)
         {
-            render->model->materials[0].SetUniform("selected", 0, GSIO_uniformFormat::Int);
+            render->model->materials[0].SetUniform("selected", gsio->state->game.selectedTroopIndex == i, GSIO_uniformFormat::Int);
             render->Render(playerView, gsio, renderContext);
         }
+        i++;
     }
 
     uiView->Clear();
