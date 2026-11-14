@@ -144,6 +144,13 @@ void MC_Game::Update(GSIO *gsio)
             MC_Enemy* en = new MC_Enemy();
             en->Load(gsio, this);
             enemies.push_back(en);
+            money = 100;
+            waveIndex = 1;
+            timeSinceWave = 0.0f;
+            permaBonusCount = 0;
+            selectedTroopIndex = -1;
+            left = false;
+            right = false;
         }
         return;
     }
@@ -261,6 +268,11 @@ void MC_Game::Update(GSIO *gsio)
     {
         timeSinceWave = 0.0f;
     }
+
+    if (troopers.size() == 0 && money < 150)
+    {
+        dead = true;
+    }
 }
 
 void MC_Enemy::PlayRandomS(MC_Game* game, GSIO* gsio)
@@ -302,7 +314,7 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
         //player.Play();
     }
 
-    if (xposition < -4.0f)
+    if (xposition < -2.0f)
     {
         game->dead = true;
     }
