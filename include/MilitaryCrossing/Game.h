@@ -24,7 +24,7 @@ class MC_Enemy
 
     bool die = false;
 
-    void PlayRandomS(MC_Game* game);
+    void PlayRandomS(MC_Game* game, GSIO* gsio);
 
     void Load(GSIO* gsio, MC_Game* game);
     void Update(GSIO* gsio, MC_Game* game);
@@ -81,8 +81,6 @@ class MC_Game
     uint64_t money = 0;
     std::vector<MC_Trooper*> troopers;
     std::vector<MC_Enemy*> enemies;
-
-    GSIO_audioHost ahost;
 
     float ProgCurve(float x);
 

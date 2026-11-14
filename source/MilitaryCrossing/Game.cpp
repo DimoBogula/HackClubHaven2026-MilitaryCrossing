@@ -3,6 +3,7 @@
 #include <MilitaryCrossing/Soundtrack.h>
 #include <GSIO/GSIO.h>
 #include <GSIO/drawing.h>
+#include <algorithm>
 
 void MC_BarricadeSoldier::SetPos()
 {
@@ -21,7 +22,7 @@ void MC_BarricadeSoldier::Load(GSIO *gsio, MC_Game *game)
     meshes.push_back(barricade);
 
     clip.Load(gsio->assetmanager.GetSoundAsset("shoot"));
-    player.LoadSoundPCM(&game->ahost, &clip);
+    player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clip);
 
     TextInit(gsio);
 
@@ -35,7 +36,7 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 
     for (MC_Enemy* en : game->enemies)
     {
-        if (en->position-position < 4.0f && timer > 0.4f)
+        if (en->position-position < 1.0f && timer > 0.4f)
         {
             en->health -= 1.0f;
             timer = 0.0f;
@@ -133,11 +134,18 @@ void MC_Game::Update(GSIO *gsio)
     {
         t->Update(gsio, this);
     }
+
+    enemies.erase(
+        std::remove_if(enemies.begin(), enemies.end(), [](const MC_Enemy* obj) {
+            return obj->die;
+        }),
+        enemies.end()
+    );
 }
 
-void MC_Enemy::PlayRandomS(MC_Game* game)
+void MC_Enemy::PlayRandomS(MC_Game* game, GSIO* gsio)
 {
-    player.LoadSoundPCM(&game->ahost, &clips[rand() % 4]);
+    player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clips[rand() % 4]);
     player.Play();
 }
 
@@ -162,7 +170,7 @@ void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
 
     gene = (((float)rand() / (float)RAND_MAX)*0.5f)+0.1f;
 
-    health = gene*10.0f*game->ProgCurve(game->waveIndex);
+    health = (gene*10.0f*game->ProgCurve(game->waveIndex))+0.4f;
 
     mesh->model->transform.size = glm::vec3(gene);
 
@@ -179,7 +187,8 @@ void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
     if (health < 0.0f)
     {
         die = true;
-        player.LoadSoundPCM(&game->ahost, &deathClip);
+        //player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &deathClip);
+        //player.Play();
     }
 }
 
