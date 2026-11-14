@@ -4,6 +4,7 @@
 #include <GSIO/GSIO.h>
 #include <GSIO/drawing.h>
 #include <algorithm>
+#include <ctime>
 
 void MC_BarricadeSoldier::SetPos()
 {
