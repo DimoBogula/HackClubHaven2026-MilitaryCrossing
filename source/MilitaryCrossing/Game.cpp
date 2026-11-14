@@ -138,12 +138,6 @@ void MC_Game::Update(GSIO *gsio)
             enemies.clear();
             for (MC_Trooper* t : troopers) delete t;
             troopers.clear();
-            MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
-            bs->Load(gsio, this);
-            troopers.push_back(bs);
-            MC_Enemy* en = new MC_Enemy();
-            en->Load(gsio, this);
-            enemies.push_back(en);
             money = 100;
             waveIndex = 1;
             timeSinceWave = 0.0f;
@@ -151,6 +145,13 @@ void MC_Game::Update(GSIO *gsio)
             selectedTroopIndex = -1;
             left = false;
             right = false;
+
+            MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
+            bs->Load(gsio, this);
+            troopers.push_back(bs);
+            MC_Enemy* en = new MC_Enemy();
+            en->Load(gsio, this);
+            enemies.push_back(en);
         }
         return;
     }
