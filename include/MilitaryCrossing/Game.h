@@ -40,6 +40,8 @@ class MC_Trooper
     float position = 0.0f;
     bool selected = false;
 
+    float timer = 0.0f;
+
     uint16_t level;
     uint16_t nextUpgradePrice;
 

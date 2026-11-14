@@ -35,8 +35,15 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 
     for (MC_Enemy* en : game->enemies)
     {
-        if (en)
+        if (en->position-position < 4.0f && timer > 0.4f)
+        {
+            en->health -= 1.0f;
+            timer = 0.0f;
+            player.Play();
+        }
     }
+
+    timer += gsio->window.i_deltaTime;
 }
 
 float MC_Game::ProgCurve(float x)
