@@ -34,6 +34,11 @@ void MC_Soundtrack::ActivateTrack(uint8_t index)
     musicConfig[index].timeSince = 0.0f;
 }
 
+void MC_Soundtrack::DeactivateTrack(uint8_t index)
+{
+    musicConfig[index].active = false;
+}
+
 void MC_Soundtrack::Test()
 {
     for (int i = 0; i < TRACK_COUNT; i++)

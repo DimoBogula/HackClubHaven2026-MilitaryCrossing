@@ -51,6 +51,7 @@ class MC_Renderer
     MC_EasyRender test;
 
     MC_RenderedText moneyText;
+    MC_RenderedText waveText;
 
     void Load(GSIO* gsio);
     void Update(GSIO* gsio);

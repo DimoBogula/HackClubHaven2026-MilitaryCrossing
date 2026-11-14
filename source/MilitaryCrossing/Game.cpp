@@ -1,5 +1,6 @@
 #include <MilitaryCrossing/Game.h>
 #include <MilitaryCrossing/Render.h>
+#include <MilitaryCrossing/Soundtrack.h>
 #include <GSIO/GSIO.h>
 #include <GSIO/drawing.h>
 
@@ -36,6 +37,39 @@ void MC_Game::Init(GSIO *gsio)
     MC_Enemy* en = new MC_Enemy();
     en->Load(gsio, this);
     enemies.push_back(en);
+
+    if (enemies.size() > 0)
+    {
+        gsio->state->soundtrack.ActivateTrack(2);
+    }
+    else
+    {
+        gsio->state->soundtrack.DeactivateTrack(2);
+    }
+    if (enemies.size() > 5)
+    {
+        gsio->state->soundtrack.ActivateTrack(3);
+    }
+    else
+    {
+        gsio->state->soundtrack.DeactivateTrack(3);
+    }
+    if (enemies.size() > 10)
+    {
+        gsio->state->soundtrack.ActivateTrack(4);
+    }
+    else
+    {
+        gsio->state->soundtrack.DeactivateTrack(4);
+    }
+    if (enemies.size() > 15)
+    {
+        gsio->state->soundtrack.ActivateTrack(5);
+    }
+    else
+    {
+        gsio->state->soundtrack.DeactivateTrack(5);
+    }
 }
 
 void MC_Game::Update(GSIO *gsio)
@@ -81,11 +115,15 @@ void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
     mesh = new MC_EasyRender();
     mesh->Load(gsio, "EnemySh", "Enemy");
     xposition = (float)rand() / (float)RAND_MAX;
-    float range = 8.0f;
+    float range = 1.0f;
     xposition *= range;
     xposition -= range/2.0f;
 
-    position = 18.0f;
+    position = 2.0f;
+
+    gene = (((float)rand() / (float)RAND_MAX)*0.5f)+0.1f;
+
+    mesh->model->transform.size = glm::vec3(gene);
 
     mesh->model->transform.position.x = xposition;
     mesh->model->transform.position.z = position;
@@ -93,7 +131,7 @@ void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
 
 void MC_Enemy::Update(GSIO *gsio, MC_Game *game)
 {
-    position -= gsio->window.i_deltaTime*30.0f;
+    position -= gsio->window.i_deltaTime*0.2f;
     mesh->model->transform.position.x = xposition;
     mesh->model->transform.position.z = position;
 }

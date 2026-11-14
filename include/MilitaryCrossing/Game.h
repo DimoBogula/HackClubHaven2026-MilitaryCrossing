@@ -16,6 +16,7 @@ class MC_Enemy
     float position;
     float xposition;
     float health = 0.0f;
+    float gene = 0.0f;
 
     void Load(GSIO* gsio, MC_Game* game);
     void Update(GSIO* gsio, MC_Game* game);

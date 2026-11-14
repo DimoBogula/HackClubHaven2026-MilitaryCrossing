@@ -29,7 +29,7 @@ void main()
     vec4 ambient = vec4(0.9, 0.9, 0.9, 1.0);
     vec4 diffuse = vec4(0.5, 0.5, 0.5, 1.0);
     vec4 specular = vec4(1.0, 1.0, 1.0, 1.0);
-    float shininess = 1.0;
+    float shininess = 10.0;
 
     vec4 light_position = vec4(1.0,1.0,1.0,0.0);
     vec4 light_color = vec4(1.0,1.0,1.0,1.0);

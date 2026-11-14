@@ -55,12 +55,15 @@ void MC_Renderer::Load(GSIO *gsio)
     test.Load(gsio, "SoldierSh", "BarricadeSoldier", "SoldierTex");
 
     moneyText.Init(&gsio->engine_font, gsio);
+    waveText.Init(&gsio->engine_font, gsio);
+    waveText.transform.position.y = ((float)gsio->window.w_height)*0.9f;
 }
 
 void MC_Renderer::Update(GSIO *gsio)
 {
 
     moneyText.text = "Geld: "+std::to_string(gsio->state->game.money);
+    waveText.text = "Wave "+std::to_string(gsio->state->game.waveIndex)+" : "+std::to_string((int)std::floor(gsio->state->game.timeSinceWave));
 
     street->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     GSIO_renderContext renderContext;
@@ -105,6 +108,7 @@ void MC_Renderer::Update(GSIO *gsio)
     uirenderContext.projection = glm::ortho(0.0f, static_cast<float>(gsio->window.w_width), 0.0f, static_cast<float>(gsio->window.w_height));
     uiView->Bind();
     moneyText.Render(gsio, uirenderContext);
+    waveText.Render(gsio, uirenderContext);
 
     playerRenderer->Render(gsio, renderContext);
     uiRenderer->Render(gsio, uirenderContext);

@@ -27,5 +27,6 @@ class MC_Soundtrack
     void Load(GSIO* gsio);
     void Update(GSIO* gsio);
     void ActivateTrack(uint8_t index);
+    void DeactivateTrack(uint8_t index);
     void Test();
 };
