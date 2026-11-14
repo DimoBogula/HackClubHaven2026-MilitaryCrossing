@@ -27,8 +27,9 @@ struct MC_EasyRender
     public:
     GSIO_artist* model;
     GSIO_material material;
+    GSIO_texture tex;
 
-    void Load(GSIO* gsio, std::string matShader, std::string meshName);
+    void Load(GSIO* gsio, std::string matShader, std::string meshName, std::string texName = "");
     void Render(GSIO_capturer* view, GSIO* gsio, GSIO_renderContext &rc);
 };
 

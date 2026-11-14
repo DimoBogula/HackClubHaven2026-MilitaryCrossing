@@ -122,6 +122,9 @@ void GSIO_uniform::SetUniform(unsigned int shaderID)
         case GSIO_uniformFormat::Float:
         glUniform1f(location, std::get<float>(value));
         break;
+        case GSIO_uniformFormat::Int:
+        glUniform1i(location, std::get<int>(value));
+        break;
     }
 }
 

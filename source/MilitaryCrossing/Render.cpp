@@ -4,6 +4,7 @@
 #include <GSIO/texture.h>
 #include <GSIO/GSIO.h>
 #include <GSIO/mesh.h>
+#include <GSIO/textureasset.h>
 #include <GL/glm/glm.hpp>
 #include <GL/glm/gtc/matrix_transform.hpp>
 #include <GL/glm/gtc/type_ptr.hpp>
@@ -50,6 +51,8 @@ void MC_Renderer::Load(GSIO *gsio)
     streetgrass->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     streetgrass->materials.push_back(streetgrassMaterial);
 
+    test.Load(gsio, "SoldierSh", "BarricadeSoldier", "SoldierTex");
+
     moneyText.Init(&gsio->engine_font, gsio);
     moneyText.text = "Geld: 0";
 }
@@ -73,6 +76,15 @@ void MC_Renderer::Update(GSIO *gsio)
 
     playerView->RenderArtist(renderContext, street);
     playerView->RenderArtist(renderContext, streetgrass);
+    
+    for (MC_Trooper* troop : gsio->state->game.troopers)
+    {
+        for (MC_EasyRender* render : troop->meshes)
+        {
+            render->model->materials[0].SetUniform("selected", 0, GSIO_uniformFormat::Int);
+            render->Render(playerView, gsio, renderContext);
+        }
+    }
 
     uiView->Clear();
 
@@ -103,10 +115,16 @@ void MC_RenderedText::Render(GSIO *gsio, GSIO_renderContext &rc)
     textobj.Render(gsio, tf, mat, &transform, rc);
 }
 
-void MC_EasyRender::Load(GSIO *gsio, std::string matShader, std::string meshName)
+void MC_EasyRender::Load(GSIO *gsio, std::string matShader, std::string meshName, std::string texName)
 {
     material.shaderID = gsio->assetmanager.GetShaderAsset(matShader)->ID;
     material.SetUniform("time", gsio->state->time, GSIO_uniformFormat::Float);
+
+    if (texName != "")
+    {
+        tex.InitTexture(GSIO_textureFilter::Linear, GL_TEXTURE0, &gsio->assetmanager.GetTextureAsset(texName)->image);
+        material.textures.push_back(&tex);
+    }
 
     model = new GSIO_artist();
     GSIO_meshasset* streetgrassMesh = gsio->assetmanager.GetMeshAsset(meshName);
