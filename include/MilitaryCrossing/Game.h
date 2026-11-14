@@ -18,10 +18,6 @@ class MC_Enemy
     float health = 0.0f;
     float gene = 0.0f;
 
-    std::vector<GSIO_audioClip> clips;
-    GSIO_audioClip deathClip;
-    GSIO_audioPlayer player;
-
     bool die = false;
 
     void PlayRandomS(MC_Game* game, GSIO* gsio);
@@ -39,6 +35,11 @@ class MC_Trooper
     float timeSinceBuy = 0.0f;
     float position = 0.0f;
     bool selected = false;
+
+    SIO_audioClip clips[4];
+    GSIO_audioPlayer clipPlayers[4];
+    GSIO_audioClip deathClip;
+    GSIO_audioPlayer deathPlayer;
 
     float timer = 0.0f;
 
@@ -78,7 +79,7 @@ class MC_Game
     bool left = false;
     bool right = false;
 
-    uint64_t money = 0;
+    uint64_t money = 100;
     std::vector<MC_Trooper*> troopers;
     std::vector<MC_Enemy*> enemies;
 

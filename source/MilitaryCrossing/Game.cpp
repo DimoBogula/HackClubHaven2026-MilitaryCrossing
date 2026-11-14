@@ -24,6 +24,15 @@ void MC_BarricadeSoldier::Load(GSIO *gsio, MC_Game *game)
     clip.Load(gsio->assetmanager.GetSoundAsset("shoot"));
     player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clip);
 
+    for (int i = 0; i < 4; i++)
+    {
+        clips[i].Load(gsio->assetmanager.GetSoundAsset(std::string("a")+std::to_string(i)));
+        clipPlayers[i].LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clips[i]);
+    }
+
+    deathClip.Load(gsio->assetmanager.GetSoundAsset("endeath"));
+    deathPlayer.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &deathClip);
+
     TextInit(gsio);
 
     SetPos();
@@ -39,7 +48,19 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
         if (en->position-position < 1.0f && timer > 0.4f)
         {
             en->health -= 1.0f;
+            if (en->health < 0.0f)
+            {
+                ma_sound_seek_to_pcm_frame(&deathPlayer.sound, 0);
+                deathPlayer.Play();
+            }
+            else
+            {
+                uint8_t index = rand() % 4;
+                ma_sound_seek_to_pcm_frame(&clipPlayers[index].sound, 0);
+                clipPlayers[index].Play();
+            }
             timer = 0.0f;
+            ma_sound_seek_to_pcm_frame(&player.sound, 0);
             player.Play();
         }
     }
@@ -99,6 +120,17 @@ void MC_Game::Init(GSIO *gsio)
 void MC_Game::Update(GSIO *gsio)
 {
     timeSinceWave += gsio->window.i_deltaTime;
+    if (enemies.size() == 0 && timeSinceWave >= 1.0f)
+    {
+        timeSinceWave = 0.0f;
+        waveIndex++;
+        for (int i = 0; i < (int)std::ceil(gsio->state->game.ProgCurve(waveIndex)); i++)
+        {
+            MC_Enemy* en = new MC_Enemy();
+            en->Load(gsio, this);
+            enemies.push_back(en);
+        }
+    }
     if (glfwGetKey(gsio->window.r_window, GLFW_KEY_UP) == GLFW_PRESS)
     {
         selectedTroopIndex = 0;
@@ -137,16 +169,25 @@ void MC_Game::Update(GSIO *gsio)
 
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const MC_Enemy* obj) {
-            return obj->die;
+            if (obj->die)
+            {
+                delete obj;
+                return true;
+            }
+            return false;
         }),
         enemies.end()
     );
+
+    if (enemies.size() == 0 && timeSinceWave > 1.0f)
+    {
+        timeSinceWave = 0.0f;
+    }
 }
 
 void MC_Enemy::PlayRandomS(MC_Game* game, GSIO* gsio)
 {
-    player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clips[rand() % 4]);
-    player.Play();
+    
 }
 
 void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
@@ -157,14 +198,6 @@ void MC_Enemy::Load(GSIO *gsio, MC_Game *game)
     float range = 1.0f;
     xposition *= range;
     xposition -= range/2.0f;
-
-    for (int i = 0; i < 4; i++)
-    {
-        GSIO_audioClip& ac = clips.emplace_back();
-        ac.Load(gsio->assetmanager.GetSoundAsset(std::string("a")+std::to_string(i)));
-    }
-
-    deathClip.Load(gsio->assetmanager.GetSoundAsset("endeath"));
 
     position = 2.0f;
 
