@@ -5,6 +5,7 @@
 #include <GSIO/drawing.h>
 #include <algorithm>
 #include <ctime>
+#include <iostream>
 
 void MC_BarricadeSoldier::SetPos()
 {
@@ -109,18 +110,18 @@ void MC_Game::Update(GSIO *gsio)
     bool right = false;
     bool enter = false;
 
-    bool trueLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS;
-    bool trueRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS;
+    bool trueLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT) == GLFW_PRESS;
+    bool trueRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
 
     if (trueLeft && lastLeft == GLFW_RELEASE)
         left = true;
 
-    lastLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_A);
+    lastLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT);
 
     if (trueRight && lastRight == GLFW_RELEASE)
         right = true;
 
-    lastRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_D);
+    lastRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT);
 
     if (glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS && lastEnter == GLFW_RELEASE)
         enter = true;
@@ -129,10 +130,12 @@ void MC_Game::Update(GSIO *gsio)
 
     if (glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
     {
-        left = glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS;
-        right = glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS;
+        left = glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT) == GLFW_PRESS;
+        right = glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT) == GLFW_PRESS;
         enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
     }
+
+    // dynamic music
     if (enemies.size() > 0)
     {
         gsio->state->soundtrack.ActivateTrack(2);
@@ -141,6 +144,13 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(2);
     }
+
+    if (left)
+        waveIndex--;
+    else if (right)
+        waveIndex++;
+
+    // wave music
     if (waveIndex > 5)
     {
         gsio->state->soundtrack.ActivateTrack(3);
@@ -165,6 +175,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(5);
     }
+
     if (dead)
     {
         if (enter)
@@ -219,19 +230,19 @@ void MC_Game::Update(GSIO *gsio)
     if (selectedTroopIndex > -1 && troopers.size() == 0) selectedTroopIndex = -1;
     if (selectedTroopIndex >= 0)
     {
-        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        if (right)
         {
             selectedTroopIndex++;
         }
-        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        if (left)
         {
             selectedTroopIndex--;
         }
         if (selectedTroopIndex < 0) selectedTroopIndex = 0;
         if (selectedTroopIndex >= troopers.size()) selectedTroopIndex = troopers.size()-1;
         float dir = 0.0f;
-        if (trueLeft) dir -= 1.0f;
-        if (trueRight) dir += 1.0f;
+        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS) dir -= 1.0f;
+        if (glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS) dir += 1.0f;
         troopers[selectedTroopIndex]->position += dir*0.6f*gsio->window.i_deltaTime;
 
         #define UPGRADE_COST 100
@@ -284,6 +295,8 @@ void MC_Game::Update(GSIO *gsio)
         }
         t->Update(gsio, this);
     }
+
+    if (enemies.size() > 0) std::cout << std::to_string(enemies[0]->xposition) << std::endl;
 
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const MC_Enemy* obj) {
