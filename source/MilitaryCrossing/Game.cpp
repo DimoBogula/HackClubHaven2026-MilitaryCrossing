@@ -151,7 +151,7 @@ void MC_Game::Update(GSIO *gsio)
         waveIndex++;
 
     // wave music
-    if (waveIndex > 5)
+    if (waveIndex >= 5)
     {
         gsio->state->soundtrack.ActivateTrack(3);
     }
@@ -159,7 +159,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(3);
     }
-    if (waveIndex > 10)
+    if (waveIndex >= 10)
     {
         gsio->state->soundtrack.ActivateTrack(4);
     }
@@ -167,7 +167,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(4);
     }
-    if (waveIndex> 15)
+    if (waveIndex >= 15)
     {
         gsio->state->soundtrack.ActivateTrack(5);
     }
@@ -288,15 +288,13 @@ void MC_Game::Update(GSIO *gsio)
 
     for (MC_Enemy* t : enemies)
     {
-        if (t->xposition < -1.9f)
+        if (t->position < -2.0f)
         {
             dead = true;
             break;
         }
         t->Update(gsio, this);
     }
-
-    if (enemies.size() > 0) std::cout << std::to_string(enemies[0]->xposition) << std::endl;
 
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(), [](const MC_Enemy* obj) {

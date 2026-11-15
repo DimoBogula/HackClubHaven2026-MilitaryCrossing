@@ -31,7 +31,6 @@ void MC_Soundtrack::Update(GSIO *gsio)
 void MC_Soundtrack::ActivateTrack(uint8_t index)
 {
     musicConfig[index].active = true;
-    musicConfig[index].timeSince = 0.0f;
 }
 
 void MC_Soundtrack::DeactivateTrack(uint8_t index)
