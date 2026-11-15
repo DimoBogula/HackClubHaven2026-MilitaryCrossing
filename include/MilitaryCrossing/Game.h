@@ -76,6 +76,8 @@ class MC_Game
 
     bool dead = false;
 
+    bool wavePause = false;
+
     float timeSinceWave = 0.0f;
     uint64_t waveIndex = 1;
 
@@ -86,12 +88,16 @@ class MC_Game
 
     int selectedTroopIndex = -1;
 
-    bool left = false;
-    bool right = false;
+    bool lastLeft = false;
+    bool lastRight = false;
+
+    bool lastEnter = false;
 
     uint64_t money = 100;
     std::vector<MC_Trooper*> troopers;
     std::vector<MC_Enemy*> enemies;
+
+    int EnemiesForWave(uint64_t waveIndex);
 
     float ProgCurve(float x);
 

@@ -62,11 +62,14 @@ void MC_Renderer::Load(GSIO *gsio)
 void MC_Renderer::Update(GSIO *gsio)
 {
 
-    moneyText.text = "Geld: "+std::to_string(gsio->state->game.money);
+    moneyText.text = "Geld: "+std::to_string(gsio->state->game.money)+" Soldaten: "+std::to_string(gsio->state->game.troopers.size())+" Gegner: "+std::to_string(gsio->state->game.enemies.size())+" Opferungen: "+std::to_string(gsio->state->game.permaBonusCount);
     if (gsio->state->game.dead)
         waveText.text = "Du bist gestorben! Enter um neu zu starten.";
     else
-        waveText.text = "Wave "+std::to_string(gsio->state->game.waveIndex)+" : "+std::to_string((int)std::floor(gsio->state->game.timeSinceWave));
+        if (!gsio->state->game.wavePause)
+            waveText.text = "Wave "+std::to_string(gsio->state->game.waveIndex)+" : "+std::to_string((int)std::floor(gsio->state->game.timeSinceWave));
+        else
+            waveText.text = "Drücke shift + enter für die nächste Wave. Gegner in der nächsten Welle: "+std::to_string(gsio->state->game.EnemiesForWave(gsio->state->game.waveIndex+1));
 
     street->transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
     GSIO_renderContext renderContext;

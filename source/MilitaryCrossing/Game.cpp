@@ -24,6 +24,7 @@ void MC_BarricadeSoldier::Load(GSIO *gsio, MC_Game *game)
 
     clip.Load(gsio->assetmanager.GetSoundAsset("shoot"));
     player.LoadSoundPCM(&gsio->state->soundtrack.musicHost, &clip);
+    player.SetVolume(0.1f);
 
     for (int i = 0; i < 4; i++)
     {
@@ -41,6 +42,7 @@ void MC_BarricadeSoldier::Load(GSIO *gsio, MC_Game *game)
 
 void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
 {
+    player.SetVolume(0.1f/(float)std::max(1,(int)game->troopers.size()));
     SetPos();
     TextUpdate(gsio);
 
@@ -51,7 +53,8 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
             game->permaBonusCount++;
             die = true;
         }
-        if (en->position-position < 1.0f && timer > 0.4f && en->health >= 0.0f)
+        int fireLevel = (int)floor((float)level / 4.0f)+1;
+        if (en->position-position < 1.0f && timer > ((0.4f)/fireLevel) && en->health >= 0.0f)
         {
             en->health -= 1.0f+((level+1)*0.4f);
             if (en->health < 0.0f)
@@ -76,6 +79,11 @@ void MC_BarricadeSoldier::Update(GSIO *gsio, MC_Game *game)
     timer += gsio->window.i_deltaTime;
 }
 
+int MC_Game::EnemiesForWave(uint64_t wi)
+{
+    return (int)std::ceil(ProgCurve(wi));
+}
+
 float MC_Game::ProgCurve(float x)
 {
     return 0.1f*std::pow(1.3f, x);
@@ -97,6 +105,34 @@ void MC_Game::Init(GSIO *gsio)
 
 void MC_Game::Update(GSIO *gsio)
 {
+    bool left = false;
+    bool right = false;
+    bool enter = false;
+
+    bool trueLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS;
+    bool trueRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS;
+
+    if (trueLeft && lastLeft == GLFW_RELEASE)
+        left = true;
+
+    lastLeft = glfwGetKey(gsio->window.r_window, GLFW_KEY_A);
+
+    if (trueRight && lastRight == GLFW_RELEASE)
+        right = true;
+
+    lastRight = glfwGetKey(gsio->window.r_window, GLFW_KEY_D);
+
+    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS && lastEnter == GLFW_RELEASE)
+        enter = true;
+
+    lastEnter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER);
+
+    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    {
+        left = glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS;
+        right = glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS;
+        enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
+    }
     if (enemies.size() > 0)
     {
         gsio->state->soundtrack.ActivateTrack(2);
@@ -105,7 +141,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(2);
     }
-    if (enemies.size() > 5)
+    if (waveIndex > 5)
     {
         gsio->state->soundtrack.ActivateTrack(3);
     }
@@ -113,7 +149,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(3);
     }
-    if (enemies.size() > 10)
+    if (waveIndex > 10)
     {
         gsio->state->soundtrack.ActivateTrack(4);
     }
@@ -121,7 +157,7 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(4);
     }
-    if (enemies.size() > 15)
+    if (waveIndex> 15)
     {
         gsio->state->soundtrack.ActivateTrack(5);
     }
@@ -129,7 +165,6 @@ void MC_Game::Update(GSIO *gsio)
     {
         gsio->state->soundtrack.DeactivateTrack(5);
     }
-    bool enter = glfwGetKey(gsio->window.r_window, GLFW_KEY_ENTER) == GLFW_PRESS;
     if (dead)
     {
         if (enter)
@@ -144,8 +179,6 @@ void MC_Game::Update(GSIO *gsio)
             timeSinceWave = 0.0f;
             permaBonusCount = 0;
             selectedTroopIndex = -1;
-            left = false;
-            right = false;
 
             MC_BarricadeSoldier* bs = new MC_BarricadeSoldier();
             bs->Load(gsio, this);
@@ -156,12 +189,16 @@ void MC_Game::Update(GSIO *gsio)
         }
         return;
     }
-    timeSinceWave += gsio->window.i_deltaTime;
-    if (enemies.size() == 0 && timeSinceWave >= 1.0f)
+
+    if (!wavePause)
+        timeSinceWave += gsio->window.i_deltaTime;
+    
+    if (enemies.size() == 0 && enter && glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && wavePause)
     {
+        wavePause = false;
         timeSinceWave = 0.0f;
         waveIndex++;
-        for (int i = 0; i < (int)std::ceil(gsio->state->game.ProgCurve(waveIndex)); i++)
+        for (int i = 0; i < EnemiesForWave(waveIndex); i++)
         {
             MC_Enemy* en = new MC_Enemy();
             en->Load(gsio, this);
@@ -179,16 +216,6 @@ void MC_Game::Update(GSIO *gsio)
         selectedTroopIndex = -1;
     }
 
-    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_PRESS)
-        left = true;
-    else if (glfwGetKey(gsio->window.r_window, GLFW_KEY_A) == GLFW_RELEASE)
-        left = false;
-
-    if (glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_PRESS)
-        right = true;
-    else if (glfwGetKey(gsio->window.r_window, GLFW_KEY_D) == GLFW_RELEASE)
-        right = false;
-
     if (selectedTroopIndex > -1 && troopers.size() == 0) selectedTroopIndex = -1;
     if (selectedTroopIndex >= 0)
     {
@@ -203,14 +230,25 @@ void MC_Game::Update(GSIO *gsio)
         if (selectedTroopIndex < 0) selectedTroopIndex = 0;
         if (selectedTroopIndex >= troopers.size()) selectedTroopIndex = troopers.size()-1;
         float dir = 0.0f;
-        if (left) dir -= 1.0f;
-        if (right) dir += 1.0f;
+        if (trueLeft) dir -= 1.0f;
+        if (trueRight) dir += 1.0f;
         troopers[selectedTroopIndex]->position += dir*0.6f*gsio->window.i_deltaTime;
 
-        if (enter && money >= 100)
+        #define UPGRADE_COST 100
+
+        if (enter && money >= UPGRADE_COST && glfwGetKey(gsio->window.r_window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
         {
-            troopers[selectedTroopIndex]->level++;
-            money -= 100;
+            if (glfwGetKey(gsio->window.r_window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS)
+            {
+                uint64_t possibleUpgrades = (uint64_t)std::floor((float)money/(float)UPGRADE_COST);
+                money -= possibleUpgrades*UPGRADE_COST;
+                troopers[selectedTroopIndex]->level += possibleUpgrades;
+            }
+            else
+            {
+                troopers[selectedTroopIndex]->level++;
+                money -= UPGRADE_COST;
+            }
             lvlUpP.Play();
         }
 
@@ -239,6 +277,11 @@ void MC_Game::Update(GSIO *gsio)
 
     for (MC_Enemy* t : enemies)
     {
+        if (t->xposition < -1.9f)
+        {
+            dead = true;
+            break;
+        }
         t->Update(gsio, this);
     }
 
@@ -268,7 +311,7 @@ void MC_Game::Update(GSIO *gsio)
 
     if (enemies.size() == 0 && timeSinceWave > 1.0f)
     {
-        timeSinceWave = 0.0f;
+        wavePause = true;
     }
 
     if (troopers.size() == 0 && money < 150)
